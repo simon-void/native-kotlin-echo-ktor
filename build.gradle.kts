@@ -1,6 +1,7 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithHostTests
 
 plugins {
-    val kotlinVersion: String = "1.7.20"
+    val kotlinVersion = "1.7.20"
     application
     kotlin("multiplatform") version kotlinVersion
 }
@@ -10,12 +11,13 @@ repositories {
 }
 
 kotlin {
-    val hostOs = System.getProperty("os.name")
-    val nativeTarget = when {
-        hostOs == "Mac OS X" -> macosX64("native")
+    val hostOs: String = System.getProperty("os.name")
+    val nativeTarget: KotlinNativeTargetWithHostTests = when {
         hostOs == "Linux" -> linuxX64("native")
-        // Other supported targets are listed here: https://ktor.io/docs/native-server.html#targets
-        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
+        hostOs == "Mac OS X" -> macosX64("native")
+        hostOs.startsWith("Windows") -> mingwX64("native")
+        // Other supported targets are listed here: https://kotlinlang.org/docs/multiplatform-dsl-reference.html#targets
+        else -> throw GradleException("Host OS '$hostOs' is not configured (or possibly supported). current possible options are: 'Linux', 'Mac OS X', 'Windows*'")
     }
 
     nativeTarget.apply {
@@ -25,8 +27,9 @@ kotlin {
             }
         }
     }
+
     sourceSets {
-        val ktorVersion: String = "2.1.2"
+        val ktorVersion = "2.1.2"
 
         val nativeMain by getting {
             dependencies {
