@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithHostTests
 
 plugins {
-    val kotlinVersion = "1.7.20"
+    val kotlinVersion = "1.9.10"
     application
     kotlin("multiplatform") version kotlinVersion
 }
@@ -29,7 +29,7 @@ kotlin {
     }
 
     sourceSets {
-        val ktorVersion = "2.1.2"
+        val ktorVersion = "2.3.4"
 
         val nativeMain by getting {
             dependencies {
