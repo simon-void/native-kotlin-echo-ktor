@@ -1,8 +1,6 @@
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTargetWithHostTests
 
 plugins {
-    val kotlinVersion = "1.9.10"
-    application
+    val kotlinVersion = "2.1.0"
     kotlin("multiplatform") version kotlinVersion
 }
 
@@ -11,13 +9,15 @@ repositories {
 }
 
 kotlin {
-    val hostOs: String = System.getProperty("os.name")
-    val nativeTarget: KotlinNativeTargetWithHostTests = when {
+    fun prop(name: String): String = requireNotNull(System.getProperty(name)) {"property $name not found"}
+    val hostOs = prop("os.name")
+    val arch = prop("os.arch")
+    val nativeTarget = when {
+        hostOs == "Mac OS X" && arch == "x86_64" -> macosX64("native")
+        hostOs == "Mac OS X" && arch == "aarch64" -> macosArm64("native")
         hostOs == "Linux" -> linuxX64("native")
-        hostOs == "Mac OS X" -> macosX64("native")
-        hostOs.startsWith("Windows") -> mingwX64("native")
-        // Other supported targets are listed here: https://kotlinlang.org/docs/multiplatform-dsl-reference.html#targets
-        else -> throw GradleException("Host OS '$hostOs' is not configured (or possibly supported). current possible options are: 'Linux', 'Mac OS X', 'Windows*'")
+        // Other supported targets are listed here: https://ktor.io/docs/native-server.html#targets
+        else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
 
     nativeTarget.apply {
@@ -29,18 +29,15 @@ kotlin {
     }
 
     sourceSets {
-        val ktorVersion = "2.3.4"
+        val ktorVersion = "3.0.3"
 
-        val nativeMain by getting {
-            dependencies {
-                implementation("io.ktor:ktor-server-core:$ktorVersion")
-                implementation("io.ktor:ktor-server-cio:$ktorVersion")
-            }
+        nativeMain.dependencies {
+            implementation("io.ktor:ktor-server-core:$ktorVersion")
+            implementation("io.ktor:ktor-server-cio:$ktorVersion")
         }
-        val nativeTest by getting {
-            dependencies {
-                implementation(kotlin("test"))
-            }
+        nativeTest.dependencies {
+            implementation(kotlin("test"))
+            implementation("io.ktor:ktor-server-test-host:$ktorVersion")
         }
     }
 }

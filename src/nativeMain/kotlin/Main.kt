@@ -12,6 +12,7 @@ fun main() {
                 call.respondText(msg)
             }
         }
+        log.info("use path /echo/${'$'}msgToEcho")
     }.start(wait = true)
 }
 
